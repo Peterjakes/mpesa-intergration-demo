@@ -20,14 +20,54 @@ const generateAccessToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Access Token Error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to generate access token',
-    });
+    res.status(500).json({ message: 'Failed to generate access token' });
+  }
+};
+
+// Initiate STK Push
+const initiateSTKPush = async (req, res) => {
+  const { phoneNumber, amount } = req.body;
+
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[^0-9]/g, '')
+    .slice(0, -3);
+
+  const password = Buffer.from(
+    `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`
+  ).toString('base64');
+
+  try {
+    const response = await axios.post(
+      'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
+      {
+        BusinessShortCode: process.env.MPESA_SHORTCODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: 'CustomerPayBillOnline',
+        Amount: amount,
+        PartyA: phoneNumber,
+        PartyB: process.env.MPESA_SHORTCODE,
+        PhoneNumber: phoneNumber,
+        CallBackURL: process.env.MPESA_CALLBACK_URL,
+        AccountReference: 'MPesaDemo',
+        TransactionDesc: 'Payment',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${req.accessToken}`,
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('STK Push Error:', error.message);
+    res.status(500).json({ message: 'STK Push failed' });
   }
 };
 
 module.exports = {
   generateAccessToken,
+  initiateSTKPush,
 };
-
