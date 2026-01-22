@@ -19,14 +19,20 @@ const generateAccessToken = async (req, res, next) => {
     req.accessToken = response.data.access_token;
     next();
   } catch (error) {
-    console.error('Access Token Error:', error.message);
-    res.status(500).json({ message: 'Failed to generate access token' });
+    res.status(500).json({ success: false, message: 'Token generation failed' });
   }
 };
 
 // Initiate STK Push
 const initiateSTKPush = async (req, res) => {
   const { phoneNumber, amount } = req.body;
+
+  if (!phoneNumber || !amount) {
+    return res.status(400).json({
+      success: false,
+      message: 'Phone number and amount are required',
+    });
+  }
 
   const timestamp = new Date()
     .toISOString()
@@ -51,7 +57,7 @@ const initiateSTKPush = async (req, res) => {
         PhoneNumber: phoneNumber,
         CallBackURL: process.env.MPESA_CALLBACK_URL,
         AccountReference: 'MPesaDemo',
-        TransactionDesc: 'Payment',
+        TransactionDesc: 'Payment for services',
       },
       {
         headers: {
@@ -60,10 +66,16 @@ const initiateSTKPush = async (req, res) => {
       }
     );
 
-    res.json(response.data);
+    res.json({
+      success: true,
+      message: 'STK Push initiated successfully',
+      data: response.data,
+    });
   } catch (error) {
-    console.error('STK Push Error:', error.message);
-    res.status(500).json({ message: 'STK Push failed' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to initiate STK Push',
+    });
   }
 };
 
