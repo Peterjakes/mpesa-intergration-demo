@@ -14,6 +14,12 @@ function App() {
   const handlePayment = async () => {
     setStatus('processing');
 
+    if (!/^254\d{9}$/.test(phoneNumber)) {
+  setStatus('error');
+  setMessage('Phone number must be in format 254XXXXXXXXX');
+  return;
+}
+
 if (response.data.success) {
   setStatus('success');
   setCheckoutRequestId(response.data.data.CheckoutRequestID);
