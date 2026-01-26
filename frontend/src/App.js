@@ -7,12 +7,20 @@ function App() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
+  const [status, setStatus] = useState('idle');
+  const [checkoutRequestId, setCheckoutRequestId] = useState('');
+
 
   const handlePayment = async () => {
-    if (!phoneNumber || !amount) {
-      setMessage('Please fill in all fields');
-      return;
-    }
+    setStatus('processing');
+
+if (response.data.success) {
+  setStatus('success');
+  setCheckoutRequestId(response.data.data.CheckoutRequestID);
+} else {
+  setStatus('error');
+}
+
 
     try {
       const response = await axios.post(`${API_URL}/mpesa/stk-push`, {
