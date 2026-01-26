@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Smartphone, Loader, CheckCircle, XCircle } from 'lucide-react';
+import './App.css';
+
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
